@@ -169,6 +169,17 @@ const GroupManage: Component = () => {
     }
   };
 
+  const handleRenameGroup = async (groupId: number, newName: string) => {
+    if (!newName.trim()) return;
+    try {
+      await api.admin.groups.update(groupId, { name: newName.trim() });
+      await fetchGroups();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to rename group';
+      setError(message);
+    }
+  };
+
   const totalParticipants = () => {
     if (isLocked()) {
       return groups().reduce((sum, g) => sum + g.participants.length, 0);
@@ -296,7 +307,21 @@ const GroupManage: Component = () => {
                     {(group) => (
                       <div class="group-card" style={{ 'border-left-color': group.color || '#e2e8f0' }}>
                         <div class="group-header">
-                          <h4 class="group-name">{group.name}</h4>
+                          <input
+                            type="text"
+                            class="group-name-input"
+                            value={group.name}
+                            onBlur={(e) => {
+                              if (e.currentTarget.value !== group.name) {
+                                handleRenameGroup(group.id, e.currentTarget.value);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                          />
                           <div class="btn-group">
                             <span class="participant-count">{group.participants.length}</span>
                             <button

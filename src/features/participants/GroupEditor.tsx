@@ -131,6 +131,7 @@ const GroupEditor: Component<GroupEditorProps> = (props) => {
               class="group-name-input"
               value={p.group.name}
               onInput={(e) => handleNameChange(p.group.id, e.currentTarget.value)}
+              placeholder="Group name"
             />
           </Show>
           <Show when={props.isLocked}>

@@ -22,6 +22,89 @@ interface EventData {
   status: string;
 }
 
+interface GroupCardProps {
+  group: Group;
+  onRename: (id: number, name: string) => void;
+  onDelete: (id: number) => void;
+  onDeleteParticipant: (id: number) => void;
+}
+
+const GroupCard: Component<GroupCardProps> = (props) => {
+  const [isEditing, setIsEditing] = createSignal(false);
+  const [editName, setEditName] = createSignal('');
+
+  const startEditing = () => {
+    setEditName(props.group.name);
+    setIsEditing(true);
+  };
+
+  const finishEditing = () => {
+    const newName = editName().trim();
+    if (newName && newName !== props.group.name) {
+      props.onRename(props.group.id, newName);
+    }
+    setIsEditing(false);
+  };
+
+  return (
+    <div class="group-card" style={{ 'border-left-color': props.group.color || '#e2e8f0' }}>
+      <div class="group-header">
+        <Show when={isEditing()} fallback={
+          <h4 
+            class="group-name group-name-editable"
+            onClick={startEditing}
+          >
+            {props.group.name}
+          </h4>
+        }>
+          <input
+            type="text"
+            class="group-name-input"
+            value={editName()}
+            onInput={(e) => setEditName(e.currentTarget.value)}
+            onBlur={finishEditing}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.currentTarget.blur();
+              }
+              if (e.key === 'Escape') {
+                setIsEditing(false);
+              }
+            }}
+            ref={(el) => el.focus()}
+          />
+        </Show>
+        <div class="btn-group">
+          <span class="participant-count">{props.group.participants.length}</span>
+          <button
+            class="btn btn-danger btn-sm"
+            style={{ 'margin-left': 'var(--spacing-xs)' }}
+            onClick={() => props.onDelete(props.group.id)}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="participant-list">
+        <For each={props.group.participants}>
+          {(p) => (
+            <div class="participant-item locked">
+              <span class="participant-name">{p.name}</span>
+              <button
+                class="btn btn-danger btn-sm btn-icon"
+                onClick={() => props.onDeleteParticipant(p.id)}
+                title="Remove participant"
+              >
+                x
+              </button>
+            </div>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+};
+
 const GroupManage: Component = () => {
   const params = useParams();
   const [event, setEvent] = createSignal<EventData | null>(null);
@@ -305,51 +388,12 @@ const GroupManage: Component = () => {
                 <div class="groups-grid">
                   <For each={groups()}>
                     {(group) => (
-                      <div class="group-card" style={{ 'border-left-color': group.color || '#e2e8f0' }}>
-                        <div class="group-header">
-                          <input
-                            type="text"
-                            class="group-name-input"
-                            value={group.name}
-                            onBlur={(e) => {
-                              if (e.currentTarget.value !== group.name) {
-                                handleRenameGroup(group.id, e.currentTarget.value);
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.currentTarget.blur();
-                              }
-                            }}
-                          />
-                          <div class="btn-group">
-                            <span class="participant-count">{group.participants.length}</span>
-                            <button
-                              class="btn btn-danger btn-sm"
-                              style={{ 'margin-left': 'var(--spacing-xs)' }}
-                              onClick={() => handleDeleteGroup(group.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                        <div class="participant-list">
-                          <For each={group.participants}>
-                            {(p) => (
-                              <div class="participant-item locked">
-                                <span class="participant-name">{p.name}</span>
-                                <button
-                                  class="btn btn-danger btn-sm btn-icon"
-                                  onClick={() => handleDeleteParticipant(p.id)}
-                                  title="Remove participant"
-                                >
-                                  x
-                                </button>
-                              </div>
-                            )}
-                          </For>
-                        </div>
-                      </div>
+                      <GroupCard
+                        group={group}
+                        onRename={handleRenameGroup}
+                        onDelete={handleDeleteGroup}
+                        onDeleteParticipant={handleDeleteParticipant}
+                      />
                     )}
                   </For>
                 </div>

@@ -1,5 +1,5 @@
 import type { Component, JSX } from 'solid-js';
-import { For, Show } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 import {
   DragDropProvider,
   DragDropSensors,
@@ -29,6 +29,8 @@ interface GroupEditorProps {
 
 const GroupEditor: Component<GroupEditorProps> = (props) => {
   const colors = () => props.colors || generateGroupColors(props.groups.length);
+  const [editingGroupId, setEditingGroupId] = createSignal<number | string | null>(null);
+  const [editingName, setEditingName] = createSignal('');
 
   const handleRemoveParticipant = (groupId: number | string, participantName: string) => {
     const newGroups = props.groups.map((group) => {
@@ -76,11 +78,22 @@ const GroupEditor: Component<GroupEditorProps> = (props) => {
     }
   };
 
-  const handleNameChange = (groupId: number | string, name: string) => {
-    const newGroups = props.groups.map((group) =>
-      group.id === groupId ? { ...group, name } : group
-    );
-    props.onGroupsChange(newGroups);
+  const startEditing = (groupId: number | string, currentName: string) => {
+    setEditingGroupId(groupId);
+    setEditingName(currentName);
+  };
+
+  const finishEditing = () => {
+    const groupId = editingGroupId();
+    const newName = editingName().trim();
+    if (groupId !== null && newName) {
+      const newGroups = props.groups.map((group) =>
+        group.id === groupId ? { ...group, name: newName } : group
+      );
+      props.onGroupsChange(newGroups);
+    }
+    setEditingGroupId(null);
+    setEditingName('');
   };
 
   const DraggableParticipant: Component<{ name: string; groupId: number | string }> = (p) => {
@@ -114,6 +127,7 @@ const GroupEditor: Component<GroupEditorProps> = (props) => {
   const DroppableGroup: Component<{ group: ShuffledGroup; color: string }> = (p) => {
     const droppable = createDroppable(p.group.id);
     const isActive = () => droppable.isActiveDroppable;
+    const isEditing = () => editingGroupId() === p.group.id;
     
     return (
       <div
@@ -126,13 +140,32 @@ const GroupEditor: Component<GroupEditorProps> = (props) => {
       >
         <div class="group-header">
           <Show when={!props.isLocked}>
-            <input
-              type="text"
-              class="group-name-input"
-              value={p.group.name}
-              onInput={(e) => handleNameChange(p.group.id, e.currentTarget.value)}
-              placeholder="Group name"
-            />
+            <Show when={isEditing()} fallback={
+              <h4 
+                class="group-name group-name-editable"
+                onClick={() => startEditing(p.group.id, p.group.name)}
+              >
+                {p.group.name}
+              </h4>
+            }>
+              <input
+                type="text"
+                class="group-name-input"
+                value={editingName()}
+                onInput={(e) => setEditingName(e.currentTarget.value)}
+                onBlur={finishEditing}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur();
+                  }
+                  if (e.key === 'Escape') {
+                    setEditingGroupId(null);
+                    setEditingName('');
+                  }
+                }}
+                ref={(el) => el.focus()}
+              />
+            </Show>
           </Show>
           <Show when={props.isLocked}>
             <h4 class="group-name">{p.group.name}</h4>

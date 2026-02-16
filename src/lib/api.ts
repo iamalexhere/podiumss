@@ -83,9 +83,9 @@ export const api = {
     groups: (slug: string) => 
       request<Array<{ id: number; name: string; color: string; participants: Array<{ id: number; name: string }> }>>(`/events/${slug}/groups`),
     games: (slug: string) => 
-      request<Array<{ id: number; name: string; status: string; scoring_mode: string }>>(`/events/${slug}/games`),
+      request<Array<{ id: number; name: string; status: string; scoring_mode: string; description?: string; sort_order: number }>>(`/events/${slug}/games`),
     scores: (slug: string) => 
-      request<Array<{ id: number; game_id: number; group_id: number; value: number }>>(`/events/${slug}/scores`),
+      request<Array<{ id: number; game_id: number; group_id: number; value: number; note?: string; created_at?: string; group?: { id: number; name: string; color?: string } }>>(`/events/${slug}/scores`),
   },
 
   admin: {
@@ -117,9 +117,9 @@ export const api = {
     },
 
     games: {
-      create: (eventId: number, data: { name: string; description?: string; scoring_mode?: string; status?: string }) => 
+      create: (eventId: number, data: { name: string; description?: string; scoring_mode?: string; status?: string; sort_order?: number }) => 
         request<{ id: number; name: string }>(`/admin/events/${eventId}/games`, { method: 'POST', body: data, auth: true }),
-      update: (id: number, data: { name?: string; description?: string; status?: string }) => 
+      update: (id: number, data: { name?: string; description?: string; status?: string; sort_order?: number }) => 
         request<{ id: number; name: string }>(`/admin/games/${id}`, { method: 'PUT', body: data, auth: true }),
       delete: (id: number) => 
         request<{ message: string }>(`/admin/games/${id}`, { method: 'DELETE', auth: true }),

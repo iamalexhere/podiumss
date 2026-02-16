@@ -10,6 +10,10 @@ app.config.timestamp_*.js
 .env
 .env*.local
 
+# Go
+*.db
+backend/score.db
+
 # dependencies
 /node_modules
 

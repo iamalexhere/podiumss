@@ -1,22 +1,26 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
-  "description": "",
+  "name": "score-system",
+  "version": "0.1.0",
+  "description": "Point Scoring System with live leaderboard",
   "type": "module",
   "scripts": {
-    "start": "vite",
     "dev": "vite",
+    "dev:backend": "cd backend && go run main.go",
     "build": "vite build",
-    "serve": "vite preview"
+    "build:backend": "cd backend && go build -o ../dist/server main.go",
+    "serve": "vite preview",
+    "seed": "cd backend && go run cmd/seed/main.go"
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.2.3",
     "solid-devtools": "^0.34.3",
     "typescript": "^5.7.2",
     "vite": "^7.1.4",
     "vite-plugin-solid": "^2.11.8"
   },
   "dependencies": {
+    "@solidjs/router": "^0.15.4",
     "solid-js": "^1.9.5"
   }
 }

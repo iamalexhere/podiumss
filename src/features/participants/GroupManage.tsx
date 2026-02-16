@@ -85,6 +85,10 @@ const GroupManage: Component = () => {
     setPendingNames([...pendingNames(), ...names]);
   };
 
+  const handleRemoveName = (index: number) => {
+    setPendingNames(pendingNames().filter((_, i) => i !== index));
+  };
+
   const handleClearAll = () => {
     setPendingNames([]);
     setShuffledGroups([]);
@@ -155,6 +159,16 @@ const GroupManage: Component = () => {
     }
   };
 
+  const handleDeleteParticipant = async (participantId: number) => {
+    try {
+      await api.admin.participants.delete(participantId);
+      await fetchGroups();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete participant';
+      setError(message);
+    }
+  };
+
   const totalParticipants = () => {
     if (isLocked()) {
       return groups().reduce((sum, g) => sum + g.participants.length, 0);
@@ -210,6 +224,8 @@ const GroupManage: Component = () => {
                     <h3 class="mb-md">Add Participants</h3>
                     <ParticipantInput
                       onAddNames={handleAddNames}
+                      onRemoveName={handleRemoveName}
+                      pendingNames={pendingNames()}
                       existingCount={totalParticipants()}
                     />
                   </div>
@@ -237,24 +253,6 @@ const GroupManage: Component = () => {
                       onLock={handleLock}
                       isLocked={false}
                     />
-                  </Show>
-
-                  <Show when={shuffledGroups().length === 0 && pendingNames().length > 0}>
-                    <div class="card">
-                      <h3 class="mb-md">Pending Participants ({pendingNames().length})</h3>
-                      <div class="participant-list">
-                        <For each={pendingNames()}>
-                          {(name) => (
-                            <div class="participant-item locked">
-                              <span class="participant-name">{name}</span>
-                            </div>
-                          )}
-                        </For>
-                      </div>
-                      <p class="text-muted mt-md">
-                        Set group count and click Shuffle to distribute into teams.
-                      </p>
-                    </div>
                   </Show>
 
                   <Show when={shuffledGroups().length === 0 && pendingNames().length === 0}>
@@ -315,6 +313,13 @@ const GroupManage: Component = () => {
                             {(p) => (
                               <div class="participant-item locked">
                                 <span class="participant-name">{p.name}</span>
+                                <button
+                                  class="btn btn-danger btn-sm btn-icon"
+                                  onClick={() => handleDeleteParticipant(p.id)}
+                                  title="Remove participant"
+                                >
+                                  x
+                                </button>
                               </div>
                             )}
                           </For>

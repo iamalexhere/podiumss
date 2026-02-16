@@ -30,6 +30,19 @@ interface GroupEditorProps {
 const GroupEditor: Component<GroupEditorProps> = (props) => {
   const colors = () => props.colors || generateGroupColors(props.groups.length);
 
+  const handleRemoveParticipant = (groupId: number | string, participantName: string) => {
+    const newGroups = props.groups.map((group) => {
+      if (group.id === groupId) {
+        return {
+          ...group,
+          participants: group.participants.filter((p) => p.name !== participantName),
+        };
+      }
+      return group;
+    });
+    props.onGroupsChange(newGroups);
+  };
+
   const handleDragEnd = (event: { draggable: { id: string | number }; droppable?: { id: string | number } | null }) => {
     if (!event.droppable) return;
 
@@ -80,7 +93,19 @@ const GroupEditor: Component<GroupEditorProps> = (props) => {
       >
         <span class="participant-name">{p.name}</span>
         <Show when={!props.isLocked}>
-          <span class="participant-handle">::</span>
+          <div class="participant-actions">
+            <span class="participant-handle">::</span>
+            <button
+              class="btn btn-danger btn-sm btn-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveParticipant(p.groupId, p.name);
+              }}
+              title="Remove participant"
+            >
+              x
+            </button>
+          </div>
         </Show>
       </div>
     );

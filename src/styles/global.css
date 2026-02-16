@@ -1026,3 +1026,64 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 100px;
   }
 }
+
+.pending-names-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-md);
+}
+
+.pending-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.pending-header h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.pending-names-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.pending-name-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background-color: var(--color-bg);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.pending-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participant-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.btn-icon {
+  padding: 2px 6px;
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.participant-item.locked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

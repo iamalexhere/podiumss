@@ -1,9 +1,11 @@
 import type { Component } from 'solid-js';
-import { createSignal, Show } from 'solid-js';
+import { createSignal, Show, For } from 'solid-js';
 import { parseNamesFromText } from '../../utils/shuffle';
 
 interface ParticipantInputProps {
   onAddNames: (names: string[]) => void;
+  onRemoveName?: (index: number) => void;
+  pendingNames?: string[];
   existingCount?: number;
 }
 
@@ -108,6 +110,45 @@ const ParticipantInput: Component<ParticipantInputProps> = (props) => {
         >
           Add Name
         </button>
+      </Show>
+
+      <Show when={props.pendingNames && props.pendingNames.length > 0}>
+        <div class="pending-names-section mt-lg">
+          <div class="pending-header">
+            <h4>Pending Names ({props.pendingNames!.length})</h4>
+            <Show when={props.onRemoveName}>
+              <button
+                class="btn btn-secondary btn-sm"
+                onClick={() => {
+                  const count = props.pendingNames?.length || 0;
+                  for (let i = 0; i < count; i++) {
+                    props.onRemoveName?.(0);
+                  }
+                }}
+              >
+                Clear All
+              </button>
+            </Show>
+          </div>
+          <div class="pending-names-list">
+            <For each={props.pendingNames}>
+              {(name, index) => (
+                <div class="pending-name-item">
+                  <span class="pending-name">{name}</span>
+                  <Show when={props.onRemoveName}>
+                    <button
+                      class="btn btn-danger btn-sm btn-icon"
+                      onClick={() => props.onRemoveName!(index())}
+                      title="Remove"
+                    >
+                      x
+                    </button>
+                  </Show>
+                </div>
+              )}
+            </For>
+          </div>
+        </div>
       </Show>
 
       <Show when={props.existingCount && props.existingCount > 0}>

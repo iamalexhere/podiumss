@@ -1,0 +1,22 @@
+[Unit]
+Description=Score System
+After=network.target
+
+[Service]
+Type=simple
+User=score-system
+Group=score-system
+WorkingDirectory=/opt/score-system
+EnvironmentFile=/opt/score-system/.env
+ExecStart=/opt/score-system/dist/server
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/score-system
+
+[Install]
+WantedBy=multi-user.target

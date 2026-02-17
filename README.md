@@ -1,36 +1,115 @@
-## Usage
+# Score System
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+A real-time point scoring system with live leaderboard, built with SolidJS and Go.
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+## Features
+
+- **Admin Dashboard** - Create events, manage groups and participants
+- **Game Management** - Multiple scoring modes (incremental/absolute)
+- **Live Leaderboard** - Real-time updates via WebSocket
+- **Mobile-First Design** - Responsive UI optimized for mobile devices
+
+## Tech Stack
+
+- **Frontend**: SolidJS + Vite + TypeScript
+- **Backend**: Gin (Go) + SQLite (GORM)
+- **Realtime**: WebSocket (Gorilla)
+- **Auth**: JWT tokens
+
+## Development
+
+### Prerequisites
+
+- Go 1.21+
+- Bun or Node.js 18+
+- SQLite3
+
+### Setup
 
 ```bash
-$ npm install # or pnpm install or yarn install
+# Install dependencies
+bun install
+
+# Create admin user (first run)
+bun run seed
+
+# Start development servers
+bun run dev          # Frontend on http://localhost:3000
+bun run dev:backend  # Backend on http://localhost:8080
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+### Build
 
-## Available Scripts
+```bash
+# Build frontend and backend
+./scripts/build.sh
 
-In the project directory, you can run:
+# Or individually
+bun run build           # Frontend -> dist/
+bun run build:backend   # Backend -> dist/server
+```
 
-### `npm run dev` or `npm start`
+### Project Structure
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+```
+src/
+  features/           # Feature-based modules
+    auth/             # Login, authentication
+    events/           # Event management
+    participants/     # Groups and participants
+    games/            # Games and scoring
+    leaderboard/      # Live leaderboard
+  hooks/              # Custom hooks (useWebSocket)
+  lib/                # API client
+  styles/             # Global CSS
+backend/
+  handlers/           # HTTP handlers
+  middleware/         # Auth, CORS
+  models/             # GORM models
+  websocket/          # WebSocket hub
+deploy/               # Deployment scripts
+```
 
 ## Deployment
 
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full deployment guide.
 
-## This project was created with the [Solid CLI](https://github.com/solidjs-community/solid-cli)
+### Quick Deploy (Debian)
+
+```bash
+# Clone and install
+git clone <repo-url> /opt/score-system
+cd /opt/score-system
+sudo ./deploy/install.sh
+
+# Create admin user
+sudo -u score-system /opt/score-system/dist/seed
+
+# Configure Traefik to proxy to http://127.0.0.1:8080
+```
+
+### Update
+
+```bash
+sudo /opt/score-system/deploy/update.sh
+```
+
+## API Endpoints
+
+### Public
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/auth/login | Login, returns JWT |
+| GET | /api/events | List active events |
+| GET | /api/events/:slug/leaderboard | Get leaderboard |
+| GET | /api/events/:slug/ws | WebSocket for realtime |
+
+### Admin (requires JWT)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/admin/events | List own events |
+| POST | /api/admin/events | Create event |
+| PUT | /api/admin/events/:id | Update event |
+| DELETE | /api/admin/events/:id | Delete event |

@@ -9,7 +9,15 @@ func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		frontendURL := config.AppConfig.FrontendURL
 
-		c.Header("Access-Control-Allow-Origin", frontendURL)
+		origin := c.Request.Header.Get("Origin")
+		if frontendURL == "" && origin != "" {
+			c.Header("Access-Control-Allow-Origin", origin)
+		} else if frontendURL != "" {
+			c.Header("Access-Control-Allow-Origin", frontendURL)
+		} else {
+			c.Header("Access-Control-Allow-Origin", "*")
+		}
+
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")

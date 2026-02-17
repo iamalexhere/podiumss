@@ -2,6 +2,10 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/scoresystem/backend/config"
@@ -20,7 +24,9 @@ func main() {
 
 	websocket.InitHub()
 
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Logger(), gin.Recovery())
 	r.Use(middleware.CORS())
 
 	api := r.Group("/api")
@@ -59,6 +65,31 @@ func main() {
 			admin.DELETE("/scores/:id", handlers.DeleteScore)
 		}
 	}
+
+	r.NoRoute(func(c *gin.Context) {
+		distPath := config.AppConfig.FrontendDist
+		if distPath == "" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+
+		path := c.Request.URL.Path
+		if path == "/" {
+			path = "/index.html"
+		}
+
+		filePath := filepath.Join(distPath, path)
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			if !strings.HasPrefix(path, "/assets/") {
+				c.File(filepath.Join(distPath, "index.html"))
+				return
+			}
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+
+		c.File(filePath)
+	})
 
 	log.Printf("Server starting on :%s", config.AppConfig.Port)
 	if err := r.Run(":" + config.AppConfig.Port); err != nil {

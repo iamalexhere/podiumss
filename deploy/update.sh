@@ -23,19 +23,28 @@ cd "$APP_DIR"
 
 log_info "Updating Score System..."
 
+BUN_PATH=""
+if command -v bun &> /dev/null; then
+    BUN_PATH=$(command -v bun)
+elif [ -f "/usr/local/bin/bun" ]; then
+    BUN_PATH="/usr/local/bin/bun"
+elif [ -f "$HOME/.bun/bin/bun" ]; then
+    BUN_PATH="$HOME/.bun/bin/bun"
+fi
+
 log_info "[1/6] Pulling latest changes..."
 su "$APP_NAME" -c "cd '$APP_DIR' && git pull"
 
 log_info "[2/6] Installing dependencies..."
-if command -v bun &> /dev/null; then
-    su "$APP_NAME" -c "cd '$APP_DIR' && bun install"
+if [ -n "$BUN_PATH" ]; then
+    su "$APP_NAME" -c "cd '$APP_DIR' && $BUN_PATH install"
 else
     su "$APP_NAME" -c "cd '$APP_DIR' && npm install"
 fi
 
 log_info "[3/6] Building frontend..."
-if command -v bun &> /dev/null; then
-    su "$APP_NAME" -c "cd '$APP_DIR' && bun run build"
+if [ -n "$BUN_PATH" ]; then
+    su "$APP_NAME" -c "cd '$APP_DIR' && $BUN_PATH run build"
 else
     su "$APP_NAME" -c "cd '$APP_DIR' && npm run build"
 fi

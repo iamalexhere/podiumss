@@ -56,7 +56,7 @@ else
 fi
 
 log_info "[4/6] Building backend..."
-su "$APP_NAME" -c "cd '$APP_DIR/backend' && go build -ldflags='-s -w' -o '../dist/server' main.go && go build -ldflags='-s -w' -o '../dist/seed' cmd/seed/main.go"
+su "$APP_NAME" -c "export GOCACHE=/tmp/go-cache-$APP_NAME && cd '$APP_DIR/backend' && go build -ldflags='-s -w' -o '../dist/server' main.go && go build -ldflags='-s -w' -o '../dist/seed' cmd/seed/main.go"
 
 log_info "[5/6] Setting permissions..."
 chown -R "$APP_NAME:$APP_NAME" "$APP_DIR"

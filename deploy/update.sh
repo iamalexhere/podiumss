@@ -24,24 +24,24 @@ cd "$APP_DIR"
 log_info "Updating Score System..."
 
 log_info "[1/6] Pulling latest changes..."
-su - "$APP_NAME" -c "cd '$APP_DIR' && git pull"
+su "$APP_NAME" -c "cd '$APP_DIR' && git pull"
 
 log_info "[2/6] Installing dependencies..."
 if command -v bun &> /dev/null; then
-    su - "$APP_NAME" -c "cd '$APP_DIR' && bun install"
+    su "$APP_NAME" -c "cd '$APP_DIR' && bun install"
 else
-    su - "$APP_NAME" -c "cd '$APP_DIR' && npm install"
+    su "$APP_NAME" -c "cd '$APP_DIR' && npm install"
 fi
 
 log_info "[3/6] Building frontend..."
 if command -v bun &> /dev/null; then
-    su - "$APP_NAME" -c "cd '$APP_DIR' && bun run build"
+    su "$APP_NAME" -c "cd '$APP_DIR' && bun run build"
 else
-    su - "$APP_NAME" -c "cd '$APP_DIR' && npm run build"
+    su "$APP_NAME" -c "cd '$APP_DIR' && npm run build"
 fi
 
 log_info "[4/6] Building backend..."
-su - "$APP_NAME" -c "cd '$APP_DIR/backend' && go build -ldflags='-s -w' -o '../dist/server' main.go && go build -ldflags='-s -w' -o '../dist/seed' cmd/seed/main.go"
+su "$APP_NAME" -c "cd '$APP_DIR/backend' && go build -ldflags='-s -w' -o '../dist/server' main.go && go build -ldflags='-s -w' -o '../dist/seed' cmd/seed/main.go"
 
 log_info "[5/6] Setting permissions..."
 chown -R "$APP_NAME:$APP_NAME" "$APP_DIR"

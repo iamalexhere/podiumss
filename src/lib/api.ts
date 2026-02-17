@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Use same-origin in production (when served by backend)
+// Use localhost:8080 in development (when Vite dev server runs separately)
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV ? 'http://localhost:8080' : '');
 
 interface ApiResponse<T> {
   success: boolean;

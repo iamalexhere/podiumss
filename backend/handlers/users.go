@@ -15,6 +15,10 @@ type CreateUserRequest struct {
 	Name     string `json:"name"`
 }
 
+type ResetPasswordRequest struct {
+	Password string `json:"password" binding:"required,min=6"`
+}
+
 type UserResponse struct {
 	ID    uint   `json:"id"`
 	Email string `json:"email"`
@@ -111,4 +115,46 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, 200, gin.H{"message": "user deleted successfully"})
+}
+
+func ResetUserPassword(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		utils.BadRequest(c, "user ID is required")
+		return
+	}
+
+	var targetUserID uint
+	if _, err := fmt.Sscanf(userID, "%d", &targetUserID); err != nil {
+		utils.BadRequest(c, "invalid user ID")
+		return
+	}
+
+	var req ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BadRequest(c, "invalid request body")
+		return
+	}
+
+	var user models.User
+	result := database.DB.First(&user, targetUserID)
+	if result.Error != nil {
+		utils.NotFound(c, "user not found")
+		return
+	}
+
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		utils.InternalError(c, "failed to hash password")
+		return
+	}
+
+	user.Password = hashedPassword
+	if result := database.DB.Save(&user); result.Error != nil {
+		utils.InternalError(c, "failed to update password")
+		return
+	}
+
+	utils.SuccessResponse(c, 200, gin.H{"message": "password reset successfully"})
 }

@@ -18,6 +18,8 @@ const UserManage: Component = () => {
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal('');
   const [createModalOpen, setCreateModalOpen] = createSignal(false);
+  const [resetPasswordModalOpen, setResetPasswordModalOpen] = createSignal(false);
+  const [selectedUserId, setSelectedUserId] = createSignal<number | null>(null);
   const [submitting, setSubmitting] = createSignal(false);
   const [deletingUserId, setDeletingUserId] = createSignal<number | null>(null);
 
@@ -25,6 +27,11 @@ const UserManage: Component = () => {
     email: '',
     password: '',
     name: '',
+  });
+
+  const [resetPassword, setResetPassword] = createSignal({
+    password: '',
+    confirmPassword: '',
   });
 
   const fetchUsers = async () => {
@@ -82,6 +89,44 @@ const UserManage: Component = () => {
     } finally {
       setDeletingUserId(null);
     }
+  };
+
+  const handleResetPassword = async (e: SubmitEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+
+    if (resetPassword().password !== resetPassword().confirmPassword) {
+      setError('Passwords do not match');
+      setSubmitting(false);
+      return;
+    }
+
+    const userId = selectedUserId();
+    if (!userId) {
+      setError('No user selected');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      await api.admin.users.resetPassword(userId, resetPassword().password);
+      setResetPasswordModalOpen(false);
+      setResetPassword({ password: '', confirmPassword: '' });
+      setSelectedUserId(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to reset password';
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openResetPasswordModal = (userId: number) => {
+    setSelectedUserId(userId);
+    setResetPassword({ password: '', confirmPassword: '' });
+    setError('');
+    setResetPasswordModalOpen(true);
   };
 
   const isCurrentUser = (userId: number) => {
@@ -143,13 +188,21 @@ const UserManage: Component = () => {
                           when={!isCurrentUser(user.id)}
                           fallback={<span class="text-muted">(Current user)</span>}
                         >
-                          <button
-                            class="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteUser(user.id, user.email)}
-                            disabled={deletingUserId() === user.id}
-                          >
-                            {deletingUserId() === user.id ? 'Deleting...' : 'Delete'}
-                          </button>
+                          <div class="btn-group">
+                            <button
+                              class="btn btn-secondary btn-sm"
+                              onClick={() => openResetPasswordModal(user.id)}
+                            >
+                              Reset Password
+                            </button>
+                            <button
+                              class="btn btn-danger btn-sm"
+                              onClick={() => handleDeleteUser(user.id, user.email)}
+                              disabled={deletingUserId() === user.id}
+                            >
+                              {deletingUserId() === user.id ? 'Deleting...' : 'Delete'}
+                            </button>
+                          </div>
                         </Show>
                       </td>
                     </tr>
@@ -213,6 +266,55 @@ const UserManage: Component = () => {
                 disabled={submitting() || !newUser().email.trim() || !newUser().password.trim()}
               >
                 {submitting() ? 'Creating...' : 'Create User'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+
+        <Modal
+          open={resetPasswordModalOpen()}
+          onClose={() => setResetPasswordModalOpen(false)}
+          title="Reset User Password"
+        >
+          <form onSubmit={handleResetPassword}>
+            <Show when={error() && resetPasswordModalOpen()}>
+              <div class="alert alert-error mb-md">{error()}</div>
+            </Show>
+
+            <Input
+              label="New Password"
+              type="password"
+              value={resetPassword().password}
+              onInput={(v) => setResetPassword({ ...resetPassword(), password: v })}
+              placeholder="Min. 6 characters"
+              required
+            />
+
+            <div class="mt-md">
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={resetPassword().confirmPassword}
+                onInput={(v) => setResetPassword({ ...resetPassword(), confirmPassword: v })}
+                placeholder="Re-enter password"
+                required
+              />
+            </div>
+
+            <div class="btn-group mt-lg">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onClick={() => setResetPasswordModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                disabled={submitting() || !resetPassword().password.trim() || !resetPassword().confirmPassword.trim()}
+              >
+                {submitting() ? 'Resetting...' : 'Reset Password'}
               </button>
             </div>
           </form>

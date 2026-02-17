@@ -66,6 +66,7 @@ func main() {
 
 			admin.GET("/users", handlers.ListUsers)
 			admin.POST("/users", handlers.CreateUser)
+			admin.PUT("/users/:id/password", handlers.ResetUserPassword)
 			admin.DELETE("/users/:id", handlers.DeleteUser)
 		}
 	}

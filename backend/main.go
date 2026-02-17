@@ -63,6 +63,10 @@ func main() {
 			admin.POST("/games/:id/scores", handlers.CreateScore)
 			admin.PUT("/scores/:id", handlers.UpdateScore)
 			admin.DELETE("/scores/:id", handlers.DeleteScore)
+
+			admin.GET("/users", handlers.ListUsers)
+			admin.POST("/users", handlers.CreateUser)
+			admin.DELETE("/users/:id", handlers.DeleteUser)
 		}
 	}
 

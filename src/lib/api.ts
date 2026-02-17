@@ -136,6 +136,15 @@ export const api = {
       delete: (id: number) => 
         request<{ message: string }>(`/admin/scores/${id}`, { method: 'DELETE', auth: true }),
     },
+
+    users: {
+      list: () => 
+        request<Array<{ id: number; email: string; name: string }>>('/admin/users', { auth: true }),
+      create: (data: { email: string; password: string; name?: string }) => 
+        request<{ id: number; email: string; name: string }>('/admin/users', { method: 'POST', body: data, auth: true }),
+      delete: (id: number) => 
+        request<{ message: string }>(`/admin/users/${id}`, { method: 'DELETE', auth: true }),
+    },
   },
 
   websocket: (slug: string): WebSocket => {

@@ -84,9 +84,14 @@ const AdminDashboard: Component = () => {
             <h1 class="page-title">Admin Dashboard</h1>
             <p class="text-muted">Welcome, {admin()?.name || admin()?.email}</p>
           </div>
-          <button class="btn btn-primary" onClick={() => setCreateModalOpen(true)}>
-            Create Event
-          </button>
+          <div class="btn-group">
+            <A href="/admin/users" class="btn btn-secondary">
+              Manage Users
+            </A>
+            <button class="btn btn-primary" onClick={() => setCreateModalOpen(true)}>
+              Create Event
+            </button>
+          </div>
         </div>
 
         <Show when={loading()}>

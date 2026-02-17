@@ -9,6 +9,7 @@ import AdminDashboard from './features/events/AdminDashboard';
 import EventManage from './features/events/EventManage';
 import GroupManage from './features/participants/GroupManage';
 import GameManage from './features/games/GameManage';
+import UserManage from './features/users/UserManage';
 import Login from './features/auth/Login';
 
 const App: Component = () => {
@@ -26,6 +27,7 @@ const App: Component = () => {
         <Route path="/live/:slug" component={Leaderboard} />
         <Route path="/login" component={Login} />
         <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/users" component={UserManage} />
         <Route path="/admin/events/:id" component={EventManage} />
         <Route path="/admin/events/:id/groups" component={GroupManage} />
         <Route path="/admin/events/:id/games" component={GameManage} />

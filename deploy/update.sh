@@ -28,8 +28,14 @@ if command -v bun &> /dev/null; then
     BUN_PATH=$(command -v bun)
 elif [ -f "/usr/local/bin/bun" ]; then
     BUN_PATH="/usr/local/bin/bun"
-elif [ -f "$HOME/.bun/bin/bun" ]; then
-    BUN_PATH="$HOME/.bun/bin/bun"
+elif [ -f "/home/alex/.bun/bin/bun" ]; then
+    BUN_PATH="/home/alex/.bun/bin/bun"
+elif [ -f "/root/.bun/bin/bun" ]; then
+    BUN_PATH="/root/.bun/bin/bun"
+fi
+
+if [ -z "$BUN_PATH" ]; then
+    log_warn "bun not found, falling back to npm"
 fi
 
 log_info "[1/6] Pulling latest changes..."
